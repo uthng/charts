@@ -3,7 +3,7 @@ apiVersion: apps/v1
 {{- else }}
 apiVersion: apps/v1beta1
 {{- end }}
-kind: Deployment
+kind: {{ .Values.deploymentType }}
 metadata:
   name: {{ template "traefik.fullname" . }}
   labels:
@@ -12,7 +12,9 @@ metadata:
     release: {{ .Release.Name | quote }}
     heritage: {{ .Release.Service | quote }}
 spec:
+  {{- if (eq .Values.deploymentType "Deployment") }}
   replicas: {{ default 1 .Values.replicas }}
+  {{- end }}
   selector:
     matchLabels:
       app: {{ template "traefik.name" . }}
@@ -40,9 +42,12 @@ spec:
 {{ toYaml .Values.deployment.podLabels | indent 8 }}
         {{- end }}
     spec:
-      {{- if .Values.securityContext }}
+      {{- if and (eq .Values.deploymentType "Deployment") .Values.securityContext }}
       securityContext:
 {{ toYaml .Values.securityContext | indent 8 }}
+      {{- end }}
+      {{- if (eq .Values.deploymentType "DaemonSet") }}
+      hostNetwork: true
       {{- end }}
       {{- if .Values.rbac.enabled }}
       serviceAccountName: {{ template "traefik.fullname" . }}
@@ -152,6 +157,14 @@ spec:
           hostPort: {{ default 8080 .Values.deployment.hostPort.dashboardPort }}
           {{- end }}
           protocol: TCP
+        {{- end }}
+        {{- if (eq .Values.deploymentType "DaemonSet") }}
+        securityContext:
+          capabilities:
+            drop:
+            - ALL
+            add:
+            - NET_BIND_SERVICE
         {{- end }}
         args:
         - --configfile=/config/traefik.toml

@@ -19,6 +19,7 @@ metadata:
   {{- end }}
   {{- end }}
 spec:
+  {{- if (eq .Values.deploymentType "Deployment") }}
   type: {{ .Values.serviceType }}
   {{- if .Values.loadBalancerIP }}
   loadBalancerIP: {{ .Values.loadBalancerIP }}
@@ -35,6 +36,7 @@ spec:
   {{- end }}
   {{- if .Values.externalTrafficPolicy }}
   externalTrafficPolicy: {{ .Values.externalTrafficPolicy }}
+  {{- end }}
   {{- end }}
   selector:
     app: {{ template "traefik.name" . }}
