@@ -21,12 +21,16 @@ metadata:
   {{- end }}
 spec:
   rules:
-  - host: {{ .Values.dashboard.domain }}
+  - host: {{ .Values.dashboard.domain.host }}
     http:
       paths:
       - backend:
           serviceName: {{ template "traefik.fullname" . }}-dashboard
           servicePort: dashboard-http
+        {{- if and .Values.dashboard.domain.path (ne .Values.dashboard.domain.path "") }}
+        path: {{ .Values.dashboard.domain.path }}
+        {{- end }}
+
   {{- if .Values.dashboard.ingress.tls }}
   tls:
 {{ toYaml .Values.dashboard.ingress.tls | indent 4 }}

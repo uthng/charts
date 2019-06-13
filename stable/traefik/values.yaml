@@ -307,7 +307,9 @@ acme:
     # existingClaim:
 dashboard:
   enabled: false
-  domain: traefik.example.com
+  domain:
+    host: traefik.example.com
+    path: "/dash"
   # serviceType: ClusterIP
   service: {}
     # annotations:
